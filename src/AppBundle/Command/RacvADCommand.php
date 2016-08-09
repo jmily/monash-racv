@@ -93,7 +93,7 @@ class RacvADCommand extends ContainerAwareCommand
             }
 
 
-            $insertSql = "INSERT INTO `unicon_ad_dd` (`PAR_ID`,`VEH_REG_ID`,`AD`,`DD`) VALUES ( '$parId', '$vehId', '$ad', '$dd') ";
+            $insertSql = "INSERT INTO `union_ad_dd` (`PAR_ID`,`VEH_REG_ID`,`AD`,`DD`) VALUES ( '$parId', '$vehId', '$ad', '$dd') ";
             $conn->query($insertSql);
 
             $progress->advance();
