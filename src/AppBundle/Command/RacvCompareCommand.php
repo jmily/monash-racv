@@ -55,7 +55,7 @@ class RacvCompareCommand extends ContainerAwareCommand
         $output->setVerbosity($output::VERBOSITY_DEBUG);
         $progress = new ProgressBar($output, count($idCollection));
         foreach ($idCollection as $k => $v) {
-            $q = "INSERT INTO `step2` (PAR_ID,NEW_CAR) VALUES ('$k','$v')";
+            $q = "INSERT INTO `step1.5` (PAR_ID,NEW_CAR) VALUES ('$k','$v')";
             $conn->query($q);
             $progress->advance();
         }

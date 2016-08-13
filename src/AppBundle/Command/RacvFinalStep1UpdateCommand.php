@@ -7,7 +7,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class RacvFinalUpdateCommand extends ContainerAwareCommand
+class RacvFinalStep1UpdateCommand extends ContainerAwareCommand
 {
     /**
      * {@inheritdoc}
@@ -43,7 +43,7 @@ class RacvFinalUpdateCommand extends ContainerAwareCommand
             }
 
             if (!$find) {
-                $sql = "UPDATE `final` SET `NEW_CAR` = '1' WHERE `PAR_ID` = $PAR_ID ";
+                $sql = "UPDATE `final_step1_result` SET `NEW_CAR` = '1' WHERE `PAR_ID` = $PAR_ID ";
                 $conn->query($sql);
             }
 
