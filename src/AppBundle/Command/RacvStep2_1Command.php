@@ -55,48 +55,27 @@ class RacvStep2_1Command extends ContainerAwareCommand
             $result = $conn->fetchAll($sql);
 
             $ad1 = $result[0]['AD'];
+            $dd1 = $result[0]['DD'];
             if ($data['total_rows'] == 1 ) {
                 $ad2 = null;
+                $dd2 = null;
             } elseif ($data['total_rows'] > 1) {
                 $ad2 = $result[1]['AD'];
+                $dd2 = $result[1]['DD'];
             }
 
-            $stmt = $conn->prepare('INSERT INTO `helper` (`PAR_ID`,`total_rows`,`AD1`,`AD2`) VALUES (:data1,:data2,:data3,:data4)');
+            $stmt = $conn->prepare('INSERT INTO `helper` (`PAR_ID`,`total_rows`,`AD1`,`AD2`,`DD1`,`DD2`) VALUES (:data1,:data2,:data3,:data4,:data5,:data6)');
             $stmt->execute([
                 ':data1' => $parId,
                 ':data2' => $data['total_rows'],
                 ':data3' => $ad1,
-                ':data4' => $ad2
+                ':data4' => $ad2,
+                ':data5' => $dd1,
+                ':data6' => $dd2
             ]);
 
             $progress->advance();
         }
         $progress->finish();
-
-
-
-        foreach ($tempObj as $parId => $data) {
-            $sql = "SELECT * FROM `union_ad_dd` WHERE `PAR_ID` = '$parId' ORDER BY DD DESC";
-            $result = $conn->fetchAll($sql);
-
-            $dd1 = $result[0]['DD'];
-            if ($data['total_rows'] == 1 ) {
-                $dd2 = null;
-            } elseif ($data['total_rows'] > 1) {
-                $dd2 = $result[1]['DD'];
-            }
-
-            $stmt = $conn->prepare('UPDATE `helper` SET `DD1` = ? , `DD2` = ? WHERE `PAR_ID` = ? ');
-            $stmt->execute([
-                $dd1,
-                $dd2,
-                $parId
-            ]);
-
-            $progress->advance();
-        }
-
-        $progress->finish();
-
     }
 }
