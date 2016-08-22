@@ -45,7 +45,7 @@ class RacvStep2_3Command extends ContainerAwareCommand
                         if ($dateHelper->isDateStrAGreaterThanDateStrB($data['DD2'], $dateHelper->getDateStrByMonthDiff($data['AD1'],'+1 month') )) {
                             $cen = 0;
                             $transitionType = 'AC';
-                            $duration = $dateHelper->dateStringAMinusDateStringB($data['AD1'],$data['DD2']);
+                            $duration = $dateHelper->dateStringAMinusDateStringB($data['AD1'],$data['AD2']);
                             $oc = $data['OC1'] + $data['OC2'];
                         } else {
                             if ($dateHelper->isDateStrAGreaterThanDateStrB($data['DD2'],$dateHelper->getDateStrByMonthDiff($data['AD1'],'-1 month')) &&
