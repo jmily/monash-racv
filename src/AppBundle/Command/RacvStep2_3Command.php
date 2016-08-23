@@ -40,12 +40,14 @@ class RacvStep2_3Command extends ContainerAwareCommand
                         $cen = 0;
                         $transitionType = 'AC';
                         $duration = $dateHelper->dateStringAMinusDateStringB($data['AD1'], $data['AD2']);
+                        $dateOfInterest = $data['AD1'];
                         $oc = $data['OC1'] + $data['OC2'];
                     } else {
                         if ($dateHelper->isDateStrAGreaterThanDateStrB($data['DD2'], $dateHelper->getDateStrByMonthDiff($data['AD1'],'+1 month') )) {
                             $cen = 0;
                             $transitionType = 'AC';
                             $duration = $dateHelper->dateStringAMinusDateStringB($data['AD1'],$data['AD2']);
+                            $dateOfInterest = $data['AD1'];
                             $oc = $data['OC1'] + $data['OC2'];
                         } else {
                             if ($dateHelper->isDateStrAGreaterThanDateStrB($data['DD2'],$dateHelper->getDateStrByMonthDiff($data['AD1'],'-1 month')) &&
@@ -54,11 +56,13 @@ class RacvStep2_3Command extends ContainerAwareCommand
                                 $cen = 0;
                                 $transitionType = 'TR';
                                 $duration = $dateHelper->dateStringAMinusDateStringB($data['AD1'],$data['AD2']);
+                                $dateOfInterest = $data['AD1'];
                                 $oc = $data['OC1'] + $data['OC2'] + 1;
                             } else {
                                 $cen = 1;
                                 $transitionType = 'NULL';
                                 $duration = $dateHelper->dateStringAMinusDateStringB($endDate,$data['AD1']);
+                                $dateOfInterest = $endDate;
                                 $oc = $data['OC1'] + $data['OC2'] + 1;
                             }
                         }
@@ -69,12 +73,14 @@ class RacvStep2_3Command extends ContainerAwareCommand
                         $cen = 0;
                         $transitionType = 'AC';
                         $duration = $dateHelper->dateStringAMinusDateStringB($data['AD1'],$data['AD2']);
+                        $dateOfInterest = $data['AD1'];
                         $oc = $data['OC1'] + $data['OC2'] + 1;
                     } else {
                         if ($dateHelper->isDateStrAGreaterThanDateStrB($data['DD2'], $dateHelper->getDateStrByMonthDiff($data['AD1'],'+1 month'))) {
                             $cen = 0;
                             $transitionType = 'AC';
                             $duration = $dateHelper->dateStringAMinusDateStringB($data['AD1'],$data['AD2']);
+                            $dateOfInterest = $data['AD1'];
                             $oc = $data['OC1'] + $data['OC2'] + 1;
                         } else {
                             //left green
@@ -84,11 +90,13 @@ class RacvStep2_3Command extends ContainerAwareCommand
                                 $cen = 0;
                                 $transitionType = 'TR';
                                 $duration = $dateHelper->dateStringAMinusDateStringB($data['AD1'],$data['AD2']);
+                                $dateOfInterest = $data['AD1'];
                                 $oc = $data['OC1'] + $data['OC2'] + 1;
                             } else {
                                 $cen = 0;
                                 $transitionType = 'DI';
                                 $duration = $dateHelper->dateStringAMinusDateStringB($data['DD1'],$data['AD1']);
+                                $dateOfInterest = $data['DD1'];
                                 $oc = $data['OC1'] + $data['OC2'] + 1;
                             }
                         }
@@ -101,18 +109,22 @@ class RacvStep2_3Command extends ContainerAwareCommand
                     $cen = 0;
                     $transitionType = 'DI';
                     $duration = $dateHelper->dateStringAMinusDateStringB($data['DD1'],$data['AD1']);
+                    $dateOfInterest = $data['DD1'];
                     $oc = $data['OC1'] + $data['OC2'];
                 } else {
                     $cen = 1;
                     $transitionType = 'NULL';
                     $duration = $dateHelper->dateStringAMinusDateStringB($endDate,$data['AD1']);
+                    $dateOfInterest = $endDate;
                     $oc = $data['OC1'] + $data['OC2'] + 1;
                 }
 
             }
 
-            $sql = "INSERT INTO `change_of_vehicle` (`PAR_ID`,`censor`,`duration`,`transition_type`,`open_contract`,`completed_contract`) 
-                    VALUES ('$parId',$cen,$duration,'$transitionType',$oc,$cc) ";
+            $yearOfTransaction = date('Y',strtotime($dateOfInterest));
+
+            $sql = "INSERT INTO `change_of_vehicle` (`PAR_ID`,`censor`,`duration`,`transition_type`,`open_contract`,`completed_contract`,`year_transaction`,`date_of_interest`) 
+                    VALUES ('$parId',$cen,$duration,'$transitionType',$oc,$cc,$yearOfTransaction,'$dateOfInterest') ";
             $conn->executeQuery($sql);
 
             $progress->advance();
