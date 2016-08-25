@@ -29,7 +29,7 @@ class RacvStep2_4Command extends ContainerAwareCommand
 
         $figuresArray = [];
         foreach ($figures as $figure) {
-            $figuresArray[date('Y-m-01',strtotime($figure['date']))] = $figure;
+            $figuresArray[date('Y',strtotime($figure['date']))] = $figure;
         }
 
 
@@ -37,10 +37,10 @@ class RacvStep2_4Command extends ContainerAwareCommand
         $progress = new ProgressBar($output, count($collection));
         foreach ($collection as $data) {
             $parId = $data['PAR_ID'];
-            $firstDay = date('Y-m-01',strtotime($data['date_of_interest']));
-            if (isset($figuresArray[$firstDay])) {
-                $index = $figuresArray[$firstDay]['price_index'];
-                $inflation = $figuresArray[$firstDay]['inflation'];
+            $yearOfInterest = date('Y',strtotime($data['date_of_interest']));
+            if (isset($figuresArray[$yearOfInterest])) {
+                $index = $figuresArray[$yearOfInterest]['price_index'];
+                $inflation = $figuresArray[$yearOfInterest]['inflation'];
                 $sql = "UPDATE `change_of_vehicle` SET `customer_price_index` = ?, `inflation` = ? WHERE `PAR_ID` = ? ";
                 $stmt = $conn->prepare($sql);
                 $stmt->execute(array($index, $inflation, $parId));
