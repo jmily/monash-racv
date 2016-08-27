@@ -7,14 +7,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class RacvStep2_5Command extends ContainerAwareCommand
+class RacvStep2_6Command extends ContainerAwareCommand
 {
-
     protected function configure()
     {
         $this
-            ->setName('racv:update:step2_5')
-            ->setDescription('update insurance');
+            ->setName('racv:update:step2_6')
+            ->setDescription('update breakdown');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -29,37 +28,37 @@ class RacvStep2_5Command extends ContainerAwareCommand
         foreach ($collection as $data) {
             $dateOfInterest = $data['date_of_interest'];
             $parId = $data['PAR_ID'];
-            $sql = "SELECT * FROM `f` WHERE `INCDNT_DTE` <= '$dateOfInterest' AND  `PAR_ID` = '$parId' ORDER BY INCDNT_DTE DESC";
+            $sql = "SELECT * FROM `d` WHERE `INCDNT_DTE` <= '$dateOfInterest' AND  `PAR_ID` = '$parId' ORDER BY INCDNT_DTE DESC";
             $results = $conn->fetchAll($sql);
 
             if ($results != null) {
-                $latestInsuranceDate = $results[0]['INCDNT_DTE'];
+                $latestBreakdownDate = $results[0]['INCDNT_DTE'];
 
-                $daysSinceLastInsurance = null;
-                if ($latestInsuranceDate != null && $latestInsuranceDate != '0000-00-00') {
-                    $daysSinceLastInsurance = $dateHelper->dateStringAMinusDateStringB($dateOfInterest,$latestInsuranceDate);
+                $daysSinceLastBreakdown = null;
+                if ($latestBreakdownDate != '0000-00-00' && $latestBreakdownDate != null) {
+                    $daysSinceLastBreakdown = $dateHelper->dateStringAMinusDateStringB($dateOfInterest,$latestBreakdownDate);
                 }
 
 
                 $lastOneYear = date('Y-m-d',strtotime($dateOfInterest.'-1 year'));
                 $lastFineYear = date('Y-m-d',strtotime($dateOfInterest.'-5 year'));
 
-                $numOfInsurancePastOneYear = 0;
-                $numOfInsurancePastFiveYear = 0;
+                $numOfBreakdownPastOneYear = 0;
+                $numOfBreakdownPastFiveYear = 0;
 
                 foreach ($results as $result) {
                     if ($dateHelper->isDateStrAGreaterThanDateStrB($result['INCDNT_DTE'],$lastOneYear)) {
-                        $numOfInsurancePastOneYear++;
+                        $numOfBreakdownPastOneYear++;
                     }
 
                     if ($dateHelper->isDateStrGreaterThanOrEqualsToDateStrB($result['INCDNT_DTE'],$lastFineYear)) {
-                        $numOfInsurancePastFiveYear++;
+                        $numOfBreakdownPastFiveYear++;
                     }
                 }
 
-                $sql = "UPDATE `change_of_vehicle` SET `insurance_claimed_past_one_year` = ?, `insurance_claimed_past_five_year` = ?, `days_since_last_insurance_claim` =? WHERE `PAR_ID` = ? ";
+                $sql = "UPDATE `change_of_vehicle` SET `num_breakdown_past_one_year` = ?, `num_breakdown_past_five_year` = ?, `days_since_last_breakdown` =? WHERE `PAR_ID` = ? ";
                 $stmt = $conn->prepare($sql);
-                $stmt->execute(array($numOfInsurancePastOneYear, $numOfInsurancePastFiveYear, $daysSinceLastInsurance, $parId));
+                $stmt->execute(array($numOfBreakdownPastOneYear, $numOfBreakdownPastFiveYear, $daysSinceLastBreakdown, $parId));
 
             }
             $progress->advance();
