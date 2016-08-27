@@ -38,22 +38,22 @@ class RacvStep2_5Command extends ContainerAwareCommand
                 $lastOneYear = date('Y-m-d',strtotime($dateOfInterest.'-1 year'));
                 $lastFineYear = date('Y-m-d',strtotime($dateOfInterest.'-5 year'));
 
-                $numOfBreakdownPastOneYear = 0;
-                $numOfBreakdownPastFiveYear = 0;
+                $numOfInsurancePastOneYear = 0;
+                $numOfInsurancePastFiveYear = 0;
 
                 foreach ($results as $result) {
                     if ($dateHelper->isDateStrAGreaterThanDateStrB($result['INCDNT_DTE'],$lastOneYear)) {
-                        $numOfBreakdownPastOneYear++;
+                        $numOfInsurancePastOneYear++;
                     }
 
                     if ($dateHelper->isDateStrGreaterThanOrEqualsToDateStrB($result['INCDNT_DTE'],$lastFineYear)) {
-                        $numOfBreakdownPastFiveYear++;
+                        $numOfInsurancePastFiveYear++;
                     }
                 }
 
-                $sql = "UPDATE `change_of_vehicle` SET `num_breakdown_past_one_year` = ?, `num_breakdown_past_five_year` = ?, `days_since_last_breakdown` =? WHERE `PAR_ID` = ? ";
+                $sql = "UPDATE `change_of_vehicle` SET `insurance_claimed_past_one_year` = ?, `insurance_claimed_past_five_year` = ?, `days_since_last_insurance_claim` =? WHERE `PAR_ID` = ? ";
                 $stmt = $conn->prepare($sql);
-                $stmt->execute(array($numOfBreakdownPastOneYear, $numOfBreakdownPastFiveYear, $latestBreakdownDate, $parId));
+                $stmt->execute(array($numOfInsurancePastOneYear, $numOfInsurancePastFiveYear, $latestBreakdownDate, $parId));
 
             }
             $progress->advance();

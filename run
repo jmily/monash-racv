@@ -1,5 +1,5 @@
 #!/bin/sh
-php bin/console racv:insert:step2_1
 php bin/console racv:update:step2_2
 php bin/console racv:insert:step2_3
 php bin/console racv:update:step2_4
+php bin/console racv:update:step2_5

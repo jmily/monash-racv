@@ -29,61 +29,27 @@ class RacvADCommand extends ContainerAwareCommand
     {
         $conn = $this->getContainer()->get('doctrine')->getConnection();
 
-        $inputParId = $input->getOption('PAR_ID');
-        $inputVehID = $input->getOption('VEH_ID');
+        $query = "SELECT `PAR_ID`,`VEH_REG_ID`, `DESCN_1_TXT`, max(ST_DTE) as `new_st`, min(`ST_DTE`) as `old_st`, max(`CANCD_DTE`) as `new_can` FROM `c_e` GROUP BY `PAR_ID`,`VEH_REG_ID`";
+        $dateCollection = $conn->fetchAll($query);
 
-        $where = '';
-        if ($inputParId) {
-            $where = "WHERE `PAR_ID` ='$inputParId'";
-            if ($inputVehID) {
-                $where .= " AND `VEH_REG_ID` = '$inputVehID'";
-            }
-        }
-
-        $query = "SELECT * FROM `c_e` ".$where." GROUP BY `PAR_ID`,`VEH_REG_ID`";
-
-        $dataToAppend = $conn->fetchAll($query);
-
-        $numberOfQuery = (count($dataToAppend));
-
+        $count = (count($dateCollection));
         $output->setVerbosity($output::VERBOSITY_DEBUG);
-        $progress = new ProgressBar($output, $numberOfQuery);
-
+        $progress = new ProgressBar($output, $count);
 
         $output->writeln([
             'Inserting data',
             '============',
             '',
         ]);
-        foreach ($dataToAppend as $d) {
-            $parId = $d['PAR_ID'];
-            $vehId = $d['VEH_REG_ID'];
-            $q = "SELECT * FROM `c_e` WHERE `PAR_ID` = '$parId' AND `VEH_REG_ID`='$vehId' ORDER BY `PAR_ID` DESC, `VEH_REG_ID` DESC, `ST_DTE` DESC";
-            $data = $conn->fetchAll($q);
 
-            $numberOfResult = count($data);
-            if ($numberOfResult == 1) {
-                $newestCancellationDate = '2100-01-01';
-                if ($data[0]['CANCD_DTE'] != '0000-00-00 00:00:00') {
-                    $newestCancellationDate = $data[0]['CANCD_DTE'];
-                }
 
-                $newestStartDate = $data[0]['ST_DTE'];
-                $oldestStartDate = $newestStartDate;
-
-            } else if ($numberOfResult > 1) {
-
-                $newestStartDate = $data[0]['ST_DTE'];
-                $oldestStartDate = $data[$numberOfResult - 1]['ST_DTE'];
-
-                $q2 = "SELECT `CANCD_DTE` FROM `c_e` WHERE `PAR_ID` = '$parId' AND `VEH_REG_ID` = '$vehId' ORDER BY `CANCD_DTE` DESC ";
-                $result = $conn->fetchAll($q2);
-
-                $newestCancellationDate = $result[0]['CANCD_DTE'];
-                if ($newestCancellationDate == '0000-00-00 00:00:00') {
-                    $newestCancellationDate = '2100-01-01';
-                }
-            }
+        foreach ($dateCollection as $data) {
+            $parId = $data['PAR_ID'];
+            $vehId = $data['VEH_REG_ID'];
+            $modelYear = $data['DESCN_1_TXT'];
+            $newestStartDate = $data['new_st'];
+            $oldestStartDate = $data['old_st'];
+            $newestCancellationDate = $data['new_can'];
 
             $ad = $oldestStartDate;
             if (strtotime($newestCancellationDate) > strtotime($newestStartDate)) {
@@ -92,9 +58,14 @@ class RacvADCommand extends ContainerAwareCommand
                 $dd = '2100-01-01';
             }
 
-
-            $insertSql = "INSERT INTO `union_ad_dd` (`PAR_ID`,`VEH_REG_ID`,`AD`,`DD`) VALUES ( '$parId', '$vehId', '$ad', '$dd') ";
-            $conn->query($insertSql);
+            $stmt = $conn->prepare("INSERT INTO `union_ad_dd` (`PAR_ID`,`VEH_REG_ID`,`AD`,`DD`,`model_year`) VALUES ( :parId, :vehId, :ad, :dd, :modelYear)");
+            $stmt->execute(array(
+                ':parId' => $parId,
+                ':vehId' => $vehId,
+                ':ad' => $ad,
+                ':dd' => $dd,
+                ':modelYear' => $modelYear
+            ));
 
             $progress->advance();
         }
