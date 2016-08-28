@@ -54,7 +54,8 @@ class DateHelper
      * @param $dateStrB
      * @return string
      */
-    public function dateStringAMinusDateStringB($dateStrA,$dateStrB) {
+    public function dateStringAMinusDateStringB($dateStrA,$dateStrB)
+    {
         $dateA = new \DateTime($dateStrA);
         $dateB = new \DateTime($dateStrB);
 
@@ -67,6 +68,15 @@ class DateHelper
         $diff = $interval->format('%a');
 
         return $symbol.$diff;
+    }
+
+
+    public function dateDiffOfYear($dateStrA,$dateStrB)
+    {
+        $dateA = new \DateTime($dateStrA);
+        $dateB = new \DateTime($dateStrB);
+
+        return $interval = $dateA->diff($dateB)->y;
     }
 
 
