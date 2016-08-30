@@ -36,6 +36,14 @@ class RacvADCommand extends ContainerAwareCommand
         $output->setVerbosity($output::VERBOSITY_DEBUG);
         $progress = new ProgressBar($output, $count);
 
+
+        $query = "SELECT * FROM `c_e`";
+        $allData = $conn->fetchAll($query);
+        $allDataArr = [];
+        foreach ($allData as $data) {
+            $allDataArr[$data['PAR_ID'].'-'.$data['VEH_REG_ID'].'-'.$data['ST_DTE']] = $data;
+        }
+
         $output->writeln([
             'Inserting data',
             '============',
@@ -57,9 +65,10 @@ class RacvADCommand extends ContainerAwareCommand
                 $dd = '2100-01-01';
             }
 
-
-            $query = "SELECT `DESCN_1_TXT` FROM `c_e` WHERE `PAR_ID` = '$parId' AND `VEH_REG_ID` = '$vehId' AND `ST_DTE` = '$ad' ";
-            $modelYear = $conn->fetchAll($query)[0]['DESCN_1_TXT'];
+            $modelYear = null;
+            if (isset($allDataArr[$parId.'-'.$vehId.'-'.$ad])) {
+                $modelYear = $allDataArr[$parId.'-'.$vehId.'-'.$ad]['DESCN_1_TXT'];
+            }
 
             $stmt = $conn->prepare("INSERT INTO `union_ad_dd` (`PAR_ID`,`VEH_REG_ID`,`AD`,`DD`,`model_year`) VALUES ( :parId, :vehId, :ad, :dd, :modelYear)");
             $stmt->execute(array(
