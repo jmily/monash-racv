@@ -29,7 +29,7 @@ class RacvADCommand extends ContainerAwareCommand
     {
         $conn = $this->getContainer()->get('doctrine')->getConnection();
 
-        $query = "SELECT `PAR_ID`,`VEH_REG_ID`, `DESCN_1_TXT`, max(ST_DTE) as `new_st`, min(`ST_DTE`) as `old_st`, max(`CANCD_DTE`) as `new_can` FROM `c_e` GROUP BY `PAR_ID`,`VEH_REG_ID`";
+        $query = "SELECT `PAR_ID`,`VEH_REG_ID`, max(ST_DTE) as `new_st`, min(`ST_DTE`) as `old_st`, max(`CANCD_DTE`) as `new_can` FROM `c_e` GROUP BY `PAR_ID`,`VEH_REG_ID`";
         $dateCollection = $conn->fetchAll($query);
 
         $count = (count($dateCollection));
@@ -46,7 +46,6 @@ class RacvADCommand extends ContainerAwareCommand
         foreach ($dateCollection as $data) {
             $parId = $data['PAR_ID'];
             $vehId = $data['VEH_REG_ID'];
-            $modelYear = $data['DESCN_1_TXT'];
             $newestStartDate = $data['new_st'];
             $oldestStartDate = $data['old_st'];
             $newestCancellationDate = $data['new_can'];
@@ -57,6 +56,10 @@ class RacvADCommand extends ContainerAwareCommand
             } else {
                 $dd = '2100-01-01';
             }
+
+
+            $query = "SELECT `DESCN_1_TXT` FROM `c_e` WHERE `PAR_ID` = '$parId' AND `VEH_REG_ID` = '$vehId' AND `ST_DTE` = '$ad' ";
+            $modelYear = $conn->fetchAll($query)[0]['DESCN_1_TXT'];
 
             $stmt = $conn->prepare("INSERT INTO `union_ad_dd` (`PAR_ID`,`VEH_REG_ID`,`AD`,`DD`,`model_year`) VALUES ( :parId, :vehId, :ad, :dd, :modelYear)");
             $stmt->execute(array(
