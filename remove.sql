@@ -1,0 +1,1 @@
+DELETE FROM `c_e` WHERE `ST_DTE` = '0000-00-00 00:00:00' or `VEH_REG_ID` is null or `VEH_REG_ID` = ''

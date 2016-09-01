@@ -22,7 +22,7 @@ class RacvStep2_3Command extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $endDate = '2016-06-01 00:00:00';
+        $endDate = '2015-11-15 00:00:00';
         $conn = $this->getContainer()->get('doctrine')->getConnection();
         $dateHelper = $this->getContainer()->get('date.helper');
 
